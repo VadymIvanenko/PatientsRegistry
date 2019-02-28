@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <DockerComposeProjectPath>../docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PatientsRegistry.Registry\PatientsRegistry.Registry.csproj" />
+    <ProjectReference Include="..\PatientsRegistry.Search\PatientsRegistry.Search.csproj" />
+    <ProjectReference Include="..\PatientsRegistry.Domain.Repositories\PatientsRegistry.Domain.Repositories.csproj" />
+    <ProjectReference Include="..\PatientsRegistry\PatientsRegistry.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="_Dockerfile" />
+  </ItemGroup>
+</Project>

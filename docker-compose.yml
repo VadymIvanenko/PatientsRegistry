@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+
+  patientsregistry.api:
+    image: ${DOCKER_REGISTRY-}patientsregistry
+    build:
+      context: .
+      dockerfile: PatientsRegistry.API/Dockerfile
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongo
+      - elasticsearch
+      
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+      
+  elasticsearch:
+    image: elasticsearch:6.6.1
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
