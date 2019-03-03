@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: PatientsRegistry.Web/Dockerfile
+    image: vivanenko/patients_registry_web
     ports:
       - 5500:80
 
@@ -13,6 +14,7 @@ services:
     build:
       context: .
       dockerfile: PatientsRegistry.API/Dockerfile
+    image: vivanenko/patients_registry_api
     ports:
       - 5000:5000
     depends_on:
