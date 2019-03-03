@@ -26,7 +26,7 @@ namespace PatientsRegistry.Domain
         {
             get { return _birthdate; }
             set {
-                if (BirthdateValidationAttribute.IsInvalid(value))
+                if (BirthdateAttribute.IsInvalid(value))
                     throw new ArgumentException("", nameof(value));
 
                 _birthdate = value;
@@ -48,7 +48,7 @@ namespace PatientsRegistry.Domain
         private readonly Dictionary<string, Contact> _contacts = new Dictionary<string, Contact>();
         public IEnumerable<Contact> Contacts => _contacts.Values;
 
-        //public string Phone => Contacts.First(c => c.Type == ContactType.Phone && c.Kind == ContactKind.Main).Value;
+        public string Phone => Contacts.First(c => c.Type == ContactType.Phone && c.Kind == ContactKind.Main).Value;
 
 
         public Patient(Guid id, FullName name, DateTime birthdate, Gender gender, string mainPhoneNumber)
@@ -97,12 +97,12 @@ namespace PatientsRegistry.Domain
                 _contacts.Add(key, contact);
         }
 
-        public void RemoveContact(Contact contact)
+        public void RemoveContact(ContactType contactType, ContactKind contactKind)
         {
-            if (contact.Type == ContactType.Phone && contact.Kind == ContactKind.Main)
+            if (contactType == ContactType.Phone && contactKind == ContactKind.Main)
                 throw new Exception("Main phone number is required contact and cannot be deleted.");
 
-            var key = string.Concat(contact.Type, contact.Kind);
+            var key = string.Concat(contactType, contactKind);
 
             if (!_contacts.ContainsKey(key))
                 throw new Exception("Contact was not found.");

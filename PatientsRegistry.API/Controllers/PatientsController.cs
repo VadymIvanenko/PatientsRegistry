@@ -1,8 +1,9 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PatientsRegistry.Registry;
+using PatientsRegistry.Search;
 
 namespace PatientsRegistry.API.Controllers
 {
@@ -10,14 +11,6 @@ namespace PatientsRegistry.API.Controllers
     [ApiController]
     public class PatientsController : ControllerBase
     {
-        public sealed class SearchParameters
-        {
-            [Required]
-            [MinLength(3)]
-            [MaxLength(256)]
-            public string Query { get; set; }
-        }
-
         private readonly IPatientsRegistry _patientsRegistry;
 
         public PatientsController(IPatientsRegistry patientsRegistry)
@@ -26,9 +19,12 @@ namespace PatientsRegistry.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetByText([FromQuery]SearchParameters parameters)
+        public async Task<IActionResult> Search([FromQuery]SearchParameters parameters)
         {
-            var patients = await _patientsRegistry.FindPatientsAsync(parameters.Query);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var patients = await _patientsRegistry.FindPatientsAsync(parameters);
 
             return Ok(patients);
         }
@@ -69,6 +65,46 @@ namespace PatientsRegistry.API.Controllers
         public async Task<IActionResult> DeleteAsync(string id)
         {
             await _patientsRegistry.DeactivatePatientAsync(Guid.Parse(id));
+
+            return Ok();
+        }
+
+        [HttpPut("{id}/contacts")]
+        public async Task<IActionResult> PutContactAsync(string id, [FromBody] ContactDto contact)
+        {
+            contact = await _patientsRegistry.SetContact(Guid.Parse(id), contact);
+
+            return Ok(contact);
+        }
+
+        [HttpDelete("{id}/contacts")]
+        public async Task<IActionResult> DeleteContactAsync(string id, string type, string kind)
+        {
+            await _patientsRegistry.RemoveContact(Guid.Parse(id), type, kind);
+
+            return Ok();
+        }
+
+        [HttpPost("/seed")]
+        public async Task<IActionResult> Seed()
+        {
+            // dev seed
+            var names = new[] { "Иван", "Константин", "Алексей", "Владислав" };
+            var lastnames = new[] { "Яременко", "Смирнов", "Полищук", "Доронин", "Петренко" };
+            var patronymics = new[] { "Александрович", "Семенович", "Алексеевич", "Петрович" };
+            var rand = new Random();
+            var requests = new int[10].Select(
+                s => _patientsRegistry.RegisterPatientAsync(new PatientCreate
+                {
+                    Name = names[rand.Next(0, names.Length - 1)],
+                    Lastname = lastnames[rand.Next(0, lastnames.Length - 1)],
+                    Patronymic = patronymics[rand.Next(0, patronymics.Length - 1)],
+                    Phone = "+380" + rand.Next(100000000, 999999999).ToString(),
+                    Birthdate = new DateTime(rand.Next(1900, 2000), rand.Next(1, 12), rand.Next(1, 28)),
+                    Gender = "Male"
+                })
+            );
+            await Task.WhenAll(requests);
 
             return Ok();
         }

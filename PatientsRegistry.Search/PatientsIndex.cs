@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Nest;
 
@@ -12,14 +13,47 @@ namespace PatientsRegistry.Search
         public PatientsIndex(string connectionString)
         {
             var node = new Uri(connectionString);
-            var settings = new ConnectionSettings(node).DefaultIndex("patients_registry");
+            var index = "patients_registry";
+            var settings = new ConnectionSettings(node)
+                .DefaultIndex(index)
+                .ThrowExceptions()
+                ;
             _elasticClient = new ElasticClient(settings);
+
+            if (!_elasticClient.IndexExists(index).Exists)
+            {
+                _elasticClient.CreateIndex(index, ms =>
+                    ms.Mappings(s =>
+                        s.Map<PatientDto>(p =>
+                            p.AutoMap()
+                            .Properties(
+                                ps => ps.Keyword(t => t.Name(n => n.Phone))
+                                    .Keyword(t => t.Name(n => n.Birthdate))
+                            )
+                        )
+                    )
+                );
+            }
         }
 
-        public async Task<IEnumerable<PatientDto>> SearchAsync(string query)
+        public async Task<IEnumerable<PatientDto>> SearchAsync(SearchParameters parameters)
         {
-            // todo: find patients by query using es
-            var response = await _elasticClient.SearchAsync<PatientDto>(s => s.Query(q => q.QueryString(d => d.Query(query))));
+            var response = await _elasticClient.SearchAsync<PatientDto>(s =>
+                s.Query(
+                    q => q.Bool(
+                        b => b.Filter(
+                            c => c.MultiMatch(
+                                m => m.Fields(f => f.Fields(p => p.Name, p => p.Lastname, p => p.Patronymic))
+                                .Query(parameters.Name)
+                                .Type(TextQueryType.CrossFields)
+                                .Operator(Operator.And)
+                            ),
+                            c => c.Prefix(f => f.Phone, parameters.Phone),
+                            c => c.Prefix(f => f.Birthdate, parameters.Birthdate)
+                        )
+                    )
+                )
+            );
 
             return response.Documents;
         }

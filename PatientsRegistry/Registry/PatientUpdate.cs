@@ -21,7 +21,7 @@ namespace PatientsRegistry.Registry
         [Name]
         public string Patronymic { get; set; }
 
-        [BirthdateValidation]
+        [Birthdate]
         public DateTime Birthdate { get; set; }
 
         [Required]

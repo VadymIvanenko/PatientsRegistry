@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
@@ -14,6 +15,14 @@ namespace PatientsRegistry.Domain.Repositories
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase("PatientsRegistry");
             _patientsCollection = database.GetCollection<PatientDto>("Patients");
+        }
+
+        public async Task<IEnumerable<Patient>> GetAllAsync()
+        {
+            var dtos = await _patientsCollection.Find(p => p.IsActive).ToListAsync();
+            var patients = dtos.Select(CreatePatient);
+
+            return patients;
         }
 
         public async Task<Patient> FindPatientAsync(Guid id)

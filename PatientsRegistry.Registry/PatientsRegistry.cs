@@ -19,9 +19,15 @@ namespace PatientsRegistry.Registry
             _patientsIndex = patientsIndex;
         }
 
-        public async Task<IEnumerable<PatientDto>> FindPatientsAsync(string query)
+        public async Task<IEnumerable<PatientDto>> FindPatientsAsync(SearchParameters parameters)
         {
-            var patients = await _patientsIndex.SearchAsync(query);
+            if (parameters.Name == null && parameters.Phone == null && parameters.Birthdate == null)
+            {
+                var entities = await _patientsRepository.GetAllAsync();
+                return entities.Select(MapToDto);
+            }
+
+            var patients = await _patientsIndex.SearchAsync(parameters);
 
             return patients;
         }
@@ -41,7 +47,7 @@ namespace PatientsRegistry.Registry
         {
             var entity = new Patient(Guid.NewGuid(),
                 new FullName(patientCreate.Name, patientCreate.Lastname, patientCreate.Patronymic),
-                patientCreate.Birthdate, Enum.Parse<Gender>(patientCreate.Gender), patientCreate.MainPhoneNumber
+                patientCreate.Birthdate.Value, Enum.Parse<Gender>(patientCreate.Gender), patientCreate.Phone
             );
 
             await _patientsRepository.SavePatientAsync(entity);
@@ -61,7 +67,7 @@ namespace PatientsRegistry.Registry
             patient.Name = new FullName(patientUpdate.Name, patientUpdate.Lastname, patientUpdate.Patronymic);
             patient.Birthdate = patientUpdate.Birthdate;
             patient.Gender = Enum.Parse<Gender>(patientUpdate.Gender);
-            // todo: update contacts
+
             await _patientsRepository.SavePatientAsync(patient);
 
             var dto = MapToDto(patient);
@@ -81,6 +87,26 @@ namespace PatientsRegistry.Registry
             await _patientsIndex.DeleteAsync(id.ToString());
         }
 
+        public async Task<ContactDto> SetContact(Guid patientId, ContactDto contact)
+        {
+            var patient = await _patientsRepository.FindPatientAsync(patientId);
+
+            patient.SetContact(new Contact(Enum.Parse<ContactType>(contact.Type), Enum.Parse<ContactKind>(contact.Kind), contact.Value));
+
+            await _patientsRepository.SavePatientAsync(patient);
+
+            return contact;
+        }
+
+        public async Task RemoveContact(Guid patientId, string contactType, string contactKind)
+        {
+            var patient = await _patientsRepository.FindPatientAsync(patientId);
+
+            patient.RemoveContact(Enum.Parse<ContactType>(contactType), Enum.Parse<ContactKind>(contactKind));
+
+            await _patientsRepository.SavePatientAsync(patient);
+        }
+
         private static PatientDto MapToDto(Patient patient)
         {
             return new PatientDto
@@ -91,6 +117,7 @@ namespace PatientsRegistry.Registry
                 Patronymic = patient.Name.Patronymic,
                 Birthdate = patient.Birthdate,
                 Gender = patient.Gender.ToString(),
+                Phone = patient.Phone,
                 Contacts = patient.Contacts.Select(c => new ContactDto
                 {
                     Type = c.Type.ToString(),

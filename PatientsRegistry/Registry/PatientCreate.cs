@@ -18,8 +18,9 @@ namespace PatientsRegistry.Registry
         [Name]
         public string Patronymic { get; set; }
 
-        [BirthdateValidation]
-        public DateTime Birthdate { get; set; }
+        [Required]
+        [Birthdate]
+        public DateTime? Birthdate { get; set; }
 
         [Required]
         [EnumDataType(typeof(Gender))]
@@ -27,6 +28,6 @@ namespace PatientsRegistry.Registry
 
         [Required]
         [CellPhone]
-        public string MainPhoneNumber { get; set; }
+        public string Phone { get; set; }
     }
 }

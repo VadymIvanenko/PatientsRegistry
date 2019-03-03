@@ -3,9 +3,9 @@
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
-    <ProjectGuid>{90E8B395-FA81-4828-98A7-DC46384B24F7}</ProjectGuid>
+    <ProjectGuid>{413A10DA-496F-451A-B80F-C523B6310F21}</ProjectGuid>
     <DockerLaunchBrowser>True</DockerLaunchBrowser>
-    <DockerServiceUrl>http://localhost:{ServicePort}/api/patients</DockerServiceUrl>
+    <DockerServiceUrl>http://localhost:{ServicePort}/api/values</DockerServiceUrl>
     <DockerServiceName>patientsregistry.api</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>

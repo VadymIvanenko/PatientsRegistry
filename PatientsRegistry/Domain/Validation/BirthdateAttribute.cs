@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PatientsRegistry.Domain.Validation
 {
-    public class BirthdateValidationAttribute : ValidationAttribute
+    public class BirthdateAttribute : ValidationAttribute
     {
-        private static readonly BirthdateValidationAttribute _instance = new BirthdateValidationAttribute();
+        private static readonly BirthdateAttribute _instance = new BirthdateAttribute();
 
         public static bool IsInvalid(object value)
         {
@@ -14,6 +14,8 @@ namespace PatientsRegistry.Domain.Validation
 
         public override bool IsValid(object value)
         {
+            if (value == null) return true;
+
             var date = (DateTime)value;
             return date <= DateTime.UtcNow && date >= new DateTime(1900, 01, 01);
         }

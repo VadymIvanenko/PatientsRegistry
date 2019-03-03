@@ -51,6 +51,9 @@ namespace PatientsRegistry.API
 
             app.UseHttpsRedirection();
             app.UseMvc();
+
+            // dev mode
+            app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
         }
     }
 }

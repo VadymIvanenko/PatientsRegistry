@@ -18,9 +18,9 @@ namespace PatientsRegistry.Domain.Validation
             var name = (string)value;
             if (name.Length > 128)
                 return false;
-            // todo: change to cyrylic
-            return new RegularExpressionAttribute(@"^[a-zA-Z]+(([' -][a-zA-Z ])?[a-zA-Z]*)*$").IsValid(name);
-            //return new RegularExpressionAttribute(@"^[а-щА-ЩЬьЮюЯяЇїІіЄєҐґ]+(([' -][а-щА-ЩЬьЮюЯяЇїІіЄєҐґ ])?[а-щА-ЩЬьЮюЯяЇїІіЄєҐґ]*)*$").IsValid(name);
+
+            //return new RegularExpressionAttribute(@"^[a-zA-Z]+(([' -][a-zA-Z ])?[a-zA-Z]*)*$").IsValid(name);
+            return new RegularExpressionAttribute(@"^[а-щА-ЩЬьЮюЯяЇїІіЄєҐґЫыЁёЪъ]+(([' -][а-щА-ЩЬьЮюЯяЇїІіЄєҐґЫыЁёЪъ ])?[а-щА-ЩЬьЮюЯяЇїІіЄєҐґЫЁёЪъ]*)*$").IsValid(name);
         }
     }
 }

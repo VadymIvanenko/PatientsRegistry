@@ -17,6 +17,8 @@ namespace PatientsRegistry.Search
 
         public string Gender { get; set; }
 
+        public string Phone { get; set; }
+
         public IEnumerable<ContactDto> Contacts { get; set; }
     }
 }
